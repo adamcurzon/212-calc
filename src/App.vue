@@ -39,57 +39,61 @@
         <div class="profit-calc">
           <label>Profit Calculation</label>
           <table>
-            <tr>
-              <th>Fee to Buy</th>
-              <td class="red">-{{ feeToBuy }} USD</td>
-            </tr>
-            <tr>
-              <th>Shares Bought</th>
-              <td>{{ numSharesBought }} Shares</td>
-            </tr>
-            <tr>
-              <th>Fee to Sell</th>
-              <td class="red">-{{ feeToSell }} USD</td>
-            </tr>
-            <tr>
-              <th>Balance</th>
-              <td>{{ gbpBalanceAfterSell }} GBP</td>
-            </tr>
-            <tr>
-              <th>Profit</th>
-              <td :class="{ 'red': this.profit <= 0, 'green': this.profit > 0 }">
-                {{ profit }} GBP
-                ({{ profitPercentage }}%)
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <th>Fee to Buy</th>
+                <td class="red">-{{ feeToBuy }} USD</td>
+              </tr>
+              <tr>
+                <th>Shares Bought</th>
+                <td>{{ numSharesBought }} Shares</td>
+              </tr>
+              <tr>
+                <th>Fee to Sell</th>
+                <td class="red">-{{ feeToSell }} USD</td>
+              </tr>
+              <tr>
+                <th>Balance</th>
+                <td>{{ gbpBalanceAfterSell }} GBP</td>
+              </tr>
+              <tr>
+                <th>Profit</th>
+                <td :class="{ 'red': this.profit <= 0, 'green': this.profit > 0 }">
+                  {{ profit }} GBP
+                  ({{ profitPercentage }}%)
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <div class="loss-calc">
           <label>Stop Loss Calculation</label>
           <table>
-            <tr>
-              <th>Fee to Buy</th>
-              <td class="red">-{{ feeToBuy }} USD</td>
-            </tr>
-            <tr>
-              <th>Shares Bought</th>
-              <td>{{ numSharesBought }} Shares</td>
-            </tr>
-            <tr>
-              <th>Fee to Sell</th>
-              <td class="red">-{{ feeToSellLoss }} USD</td>
-            </tr>
-            <tr>
-              <th>Balance</th>
-              <td>{{ gbpBalanceAfterSellLoss }} GBP</td>
-            </tr>
-            <tr>
-              <th>Loss</th>
-              <td :class="{ 'red': this.loss <= 0, 'green': this.loss > 0 }">
-                {{ loss }} GBP
-                ({{ lossPercentage }}%)
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <th>Fee to Buy</th>
+                <td class="red">-{{ feeToBuy }} USD</td>
+              </tr>
+              <tr>
+                <th>Shares Bought</th>
+                <td>{{ numSharesBought }} Shares</td>
+              </tr>
+              <tr>
+                <th>Fee to Sell</th>
+                <td class="red">-{{ feeToSellLoss }} USD</td>
+              </tr>
+              <tr>
+                <th>Balance</th>
+                <td>{{ gbpBalanceAfterSellLoss }} GBP</td>
+              </tr>
+              <tr>
+                <th>Loss</th>
+                <td :class="{ 'red': this.loss <= 0, 'green': this.loss > 0 }">
+                  {{ loss }} GBP
+                  ({{ lossPercentage }}%)
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -269,7 +273,7 @@ label {
 .input-row {
   display: flex;
   align-items: center;
-  /* border: 1px solid #ccc; */
+  border: 1px solid #2c3e50;
   padding: 10px;
   border-radius: 5px;
   background-color: #2c3e50;
