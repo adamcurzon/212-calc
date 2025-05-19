@@ -299,6 +299,10 @@ h1 {
   .input {
     grid-row: 2;
   }
+
+  .modal {
+    margin: 0px 10px;
+  }
 }
 
 label {
