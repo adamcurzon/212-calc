@@ -448,10 +448,18 @@ table tr:last-child th {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.modal {
+  background-color: #34495e;
+  padding: 20px;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 500px;
 }
 
 #popup.active {
