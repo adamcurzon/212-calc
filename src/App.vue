@@ -23,15 +23,13 @@
           <div class="input-icon">£</div>
           <input type="number" step="0.01" v-model="form.balance" id="balance" placeholder="Balance" />
         </div>
-        <label for="exchangeRate">Exchange Rate</label>
-        <div class="input-row">
-          <div class="input-icon">%</div>
-          <input type="number" step="any" v-model="form.exchangeRate" id="exchangeRate" placeholder="Exchange Rate" />
-        </div>
-        <label for="fxFee">FX Fee</label>
-        <div class="input-row">
-          <div class="input-icon">%</div>
-          <input type="number" step="0.01" v-model="form.fxFee" id="fxFee" placeholder="FX Fee" />
+        <div class="buttons">
+          <button @click="openPopup">
+            Edit Fees
+          </button>
+          <button @click="resetForm">
+            Reset
+          </button>
         </div>
       </div>
 
@@ -98,6 +96,34 @@
         </div>
       </div>
     </div>
+    <div id="popup" :class="{ 'active': popupOpen }">
+      <div class="modal">
+        <div class="input">
+          <button @click="closePopup">Close Fees</button>
+          <label for="exchangeRate">Exchange Rate</label>
+          <div class="input-row">
+            <div class="input-icon">%</div>
+            <input type="number" step="0.01" v-model="form.exchangeRate" id="exchangeRate"
+              placeholder="Exchange Rate" />
+          </div>
+          <label for="fxFee">FX Fee</label>
+          <div class="input-row">
+            <div class="input-icon">%</div>
+            <input type="number" step="0.01" v-model="form.fxFee" id="fxFee" placeholder="FX Fee" />
+          </div>
+          <label for="finraFee">Finra Fee</label>
+          <div class="input-row">
+            <div class="input-icon">%</div>
+            <input type="number" step="0.01" v-model="form.finraFee" id="finraFee" placeholder="Finra Fee" />
+          </div>
+          <label for="secFee">SEC Fee</label>
+          <div class="input-row">
+            <div class="input-icon">%</div>
+            <input type="number" step="0.01" v-model="form.secFee" id="secFee" placeholder="SEC Fee" />
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -112,8 +138,11 @@ export default {
         stopLoss: '9.00',
         balance: '10000.00',
         exchangeRate: '1.34',
-        fxFee: '0.15'
+        fxFee: '0.15',
+        finraFee: '0.000166',
+        secFee: '0.00278',
       },
+      popupOpen: false,
     }
   },
   methods: {
@@ -129,6 +158,31 @@ export default {
       const fxFee = parseFloat(this.form.fxFee) / 100;
       return (amount * fxFee).toFixed(2);
     },
+    finraFee(numOfShares) {
+      return (numOfShares * this.form.finraFee).toFixed(4);
+    },
+    secFee(numOfShares, sellPrice) {
+      return (numOfShares * sellPrice * (this.form.secFee / 100)).toFixed(4);
+    },
+    closePopup() {
+      this.popupOpen = false;
+    },
+    openPopup() {
+      this.popupOpen = true;
+    },
+    resetForm() {
+      this.form = {
+        buyPrice: '10.00',
+        sellPrice: '11.00',
+        stopLoss: '9.00',
+        balance: '10000.00',
+        exchangeRate: '1.34',
+        fxFee: '0.15',
+        finraFee: '0.000166',
+        secFee: '0.00278',
+      }
+      localStorage.removeItem('form');
+    }
   },
   computed: {
     usdBalance() {
@@ -141,7 +195,10 @@ export default {
       return parseFloat(parseFloat(this.usdBalance - this.feeToBuy) / parseFloat(this.form.buyPrice)).toFixed(2);
     },
     feeToSell() {
-      return parseFloat(this.calcFXFee(this.numSharesBought * this.form.sellPrice));
+      const fxFee = parseFloat(this.calcFXFee(this.numSharesBought * this.form.sellPrice));
+      const finraFee = parseFloat(this.finraFee(this.numSharesBought));
+      const secFee = parseFloat(this.secFee(this.numSharesBought, this.form.sellPrice));
+      return parseFloat(fxFee + finraFee + secFee).toFixed(2);
     },
     usdBalanceAfterSell() {
       return parseFloat(parseFloat(this.numSharesBought * this.form.sellPrice) - this.feeToSell).toFixed(2);
@@ -156,7 +213,10 @@ export default {
       return parseFloat((this.profit / this.form.balance) * 100).toFixed(2);
     },
     feeToSellLoss() {
-      return parseFloat(this.calcFXFee(this.numSharesBought * this.form.stopLoss));
+      const fxFee = parseFloat(this.calcFXFee(this.numSharesBought * this.form.stopLoss));
+      const finraFee = parseFloat(this.finraFee(this.numSharesBought));
+      const secFee = parseFloat(this.secFee(this.numSharesBought, this.form.stopLoss));
+      return parseFloat(fxFee + finraFee + secFee).toFixed(2);
     },
     gbpBalanceAfterSellLoss() {
       return parseFloat(this.convertUSDtoGBP(parseFloat(this.numSharesBought * this.form.stopLoss) - this.feeToSellLoss)).toFixed(2);
@@ -166,7 +226,7 @@ export default {
     },
     lossPercentage() {
       return parseFloat((this.loss / this.form.balance) * 100).toFixed(2);
-    }
+    },
   },
   created() {
     const savedForm = localStorage.getItem('form');
@@ -196,7 +256,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #dddddd;
-  margin-top: 60px;
+}
+
+main {
+  padding-top: 50px;
 }
 
 h1 {
@@ -220,6 +283,7 @@ h1 {
 
   main {
     padding-bottom: 50px;
+    padding-top: 0px !important;
   }
 
   .profit-calc,
@@ -229,6 +293,7 @@ h1 {
 
   .output {
     grid-row: 1;
+    margin-top: 0px !important;
   }
 
   .input {
@@ -286,7 +351,8 @@ label {
   margin-top: 10px;
 }
 
-.input-row {
+.input-row,
+button {
   display: flex;
   align-items: center;
   border: 1px solid #2c3e50;
@@ -294,6 +360,21 @@ label {
   border-radius: 5px;
   background-color: #2c3e50;
   color: white;
+}
+
+button {
+  align-content: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 22px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #DDD;
+}
+
+button:hover {
+  opacity: 0.8;
 }
 
 .input-icon {
@@ -358,5 +439,34 @@ table tr:last-child th {
 table tr:last-child td,
 table tr:last-child th {
   font-weight: 700;
+}
+
+#popup {
+  display: none !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#popup.active {
+  display: flex !important;
+}
+
+.buttons button {
+  width: 50%;
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  gap: 20px;
 }
 </style>
