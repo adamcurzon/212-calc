@@ -6,32 +6,32 @@
         <label for="buyPrice">Buy Price</label>
         <div class="input-row">
           <div class="input-icon">$</div>
-          <input type="number" step="0.01" v-model="buyPrice" id="buyPrice" placeholder="Buy Price" />
+          <input type="number" step="0.01" v-model="form.buyPrice" id="buyPrice" placeholder="Buy Price" />
         </div>
         <label for="sellPrice">Sell Price</label>
         <div class="input-row">
           <div class="input-icon">$</div>
-          <input type="number" step="0.01" v-model="sellPrice" id="sellPrice" placeholder="Sell Price" />
+          <input type="number" step="0.01" v-model="form.sellPrice" id="sellPrice" placeholder="Sell Price" />
         </div>
         <label for="stopLoss">Stop Loss</label>
         <div class="input-row">
           <div class="input-icon">$</div>
-          <input type="number" step="0.01" v-model="stopLoss" id="stopLoss" placeholder="Stop Loss" />
+          <input type="number" step="0.01" v-model="form.stopLoss" id="stopLoss" placeholder="Stop Loss" />
         </div>
         <label for="balance">Balance</label>
         <div class="input-row">
           <div class="input-icon">£</div>
-          <input type="number" step="0.01" v-model="balance" id="balance" placeholder="Balance" />
+          <input type="number" step="0.01" v-model="form.balance" id="balance" placeholder="Balance" />
         </div>
         <label for="exchangeRate">Exchange Rate</label>
         <div class="input-row">
           <div class="input-icon">%</div>
-          <input type="number" step="any" v-model="exchangeRate" id="exchangeRate" placeholder="Exchange Rate" />
+          <input type="number" step="any" v-model="form.exchangeRate" id="exchangeRate" placeholder="Exchange Rate" />
         </div>
         <label for="fxFee">FX Fee</label>
         <div class="input-row">
           <div class="input-icon">%</div>
-          <input type="number" step="0.01" v-model="fxFee" id="fxFee" placeholder="FX Fee" />
+          <input type="number" step="0.01" v-model="form.fxFee" id="fxFee" placeholder="FX Fee" />
         </div>
       </div>
 
@@ -106,64 +106,80 @@ export default {
   name: 'App',
   data() {
     return {
-      buyPrice: '10.00',
-      sellPrice: '11.00',
-      stopLoss: '9.00',
-      balance: '10000.00',
-      exchangeRate: '1.34',
-      fxFee: '0.15'
+      form: {
+        buyPrice: '10.00',
+        sellPrice: '11.00',
+        stopLoss: '9.00',
+        balance: '10000.00',
+        exchangeRate: '1.34',
+        fxFee: '0.15'
+      },
     }
   },
   methods: {
     convertGBPtoUSD(amount) {
-      const exchangeRate = parseFloat(this.exchangeRate);
+      const exchangeRate = parseFloat(this.form.exchangeRate);
       return (amount * exchangeRate).toFixed(2);
     },
     convertUSDtoGBP(amount) {
-      const exchangeRate = parseFloat(this.exchangeRate);
+      const exchangeRate = parseFloat(this.form.exchangeRate);
       return (amount / exchangeRate).toFixed(2);
     },
     calcFXFee(amount) {
-      const fxFee = parseFloat(this.fxFee) / 100;
+      const fxFee = parseFloat(this.form.fxFee) / 100;
       return (amount * fxFee).toFixed(2);
     },
   },
   computed: {
     usdBalance() {
-      return parseFloat(this.convertGBPtoUSD(this.balance));
+      return parseFloat(this.convertGBPtoUSD(this.form.balance));
     },
     feeToBuy() {
       return parseFloat(this.calcFXFee(this.usdBalance));
     },
     numSharesBought() {
-      return parseFloat(parseFloat(this.usdBalance - this.feeToBuy) / parseFloat(this.buyPrice)).toFixed(2);
+      return parseFloat(parseFloat(this.usdBalance - this.feeToBuy) / parseFloat(this.form.buyPrice)).toFixed(2);
     },
     feeToSell() {
-      return parseFloat(this.calcFXFee(this.numSharesBought * this.sellPrice));
+      return parseFloat(this.calcFXFee(this.numSharesBought * this.form.sellPrice));
     },
     usdBalanceAfterSell() {
-      return parseFloat(parseFloat(this.numSharesBought * this.sellPrice) - this.feeToSell).toFixed(2);
+      return parseFloat(parseFloat(this.numSharesBought * this.form.sellPrice) - this.feeToSell).toFixed(2);
     },
     gbpBalanceAfterSell() {
       return parseFloat(this.convertUSDtoGBP(this.usdBalanceAfterSell)).toFixed(2);
     },
     profit() {
-      return parseFloat(this.gbpBalanceAfterSell - this.balance).toFixed(2);
+      return parseFloat(this.gbpBalanceAfterSell - this.form.balance).toFixed(2);
     },
     profitPercentage() {
-      return parseFloat((this.profit / this.balance) * 100).toFixed(2);
+      return parseFloat((this.profit / this.form.balance) * 100).toFixed(2);
     },
     feeToSellLoss() {
-      return parseFloat(this.calcFXFee(this.numSharesBought * this.stopLoss));
+      return parseFloat(this.calcFXFee(this.numSharesBought * this.form.stopLoss));
     },
     gbpBalanceAfterSellLoss() {
-      return parseFloat(this.convertUSDtoGBP(parseFloat(this.numSharesBought * this.stopLoss) - this.feeToSellLoss)).toFixed(2);
+      return parseFloat(this.convertUSDtoGBP(parseFloat(this.numSharesBought * this.form.stopLoss) - this.feeToSellLoss)).toFixed(2);
     },
     loss() {
-      return parseFloat(this.gbpBalanceAfterSellLoss - this.balance).toFixed(2);
+      return parseFloat(this.gbpBalanceAfterSellLoss - this.form.balance).toFixed(2);
     },
     lossPercentage() {
-      return parseFloat((this.loss / this.balance) * 100).toFixed(2);
+      return parseFloat((this.loss / this.form.balance) * 100).toFixed(2);
+    }
+  },
+  created() {
+    const savedForm = localStorage.getItem('form');
+    if (savedForm) {
+      this.form = JSON.parse(savedForm);
+    }
+  },
+  watch: {
+    form: {
+      handler(newVal) {
+        localStorage.setItem('form', JSON.stringify(newVal));
+      },
+      deep: true
     }
   }
 }
@@ -297,6 +313,7 @@ label {
   text-align: right;
   background-color: transparent;
   color: white !important;
+  font-size: 16px;
 }
 
 table {
